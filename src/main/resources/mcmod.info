@@ -1,0 +1,16 @@
+[
+{
+  "modid": "hotkeys",
+  "name": "Hotkeys",
+  "description": "EMCApp: Adds customizable, in-game hotkeys.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Whodundid, Mr.JamminOtter"],
+  "credits": "Requires 'EnhancedMC' version 1.0 to work!",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": ["enhancedmc"]
+}
+]
