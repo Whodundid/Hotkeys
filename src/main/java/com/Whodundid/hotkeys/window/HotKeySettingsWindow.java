@@ -20,7 +20,7 @@ public class HotKeySettingsWindow extends WindowParent {
 	
 	HotKeyApp mod = (HotKeyApp) RegisteredApps.getApp(AppType.HOTKEYS);
 	WindowContainer settings, keyList;
-	WindowButton stopMovement, runKeyBuilderTutorial;
+	WindowButton stopMovement, createExample;
 	WindowButton loadKeyList, saveKeyList, resetKeyList;
 	WindowLabel stopMovementLabel, runKeyBuilderLabel;
 	WindowDialogueBox msgBox;
@@ -52,15 +52,15 @@ public class HotKeySettingsWindow extends WindowParent {
 		stopMovement = new WindowButton(settings, sDim.startX + 10, sDim.startY + 26, 55, 20).setTrueFalseButton(true).updateTrueFalseDisplay(mod.doesCtrlKeyStopMovement());
 		stopMovementLabel = new WindowLabel(settings, stopMovement.endX + (endX - stopMovement.endX) / 2, stopMovement.startY + 4, "Stop movement when Ctrl is pressed", 0xb2b2b2);
 		
-		runKeyBuilderTutorial = new WindowButton(settings, sDim.startX + 10, stopMovement.endY + 6, 55, 20).setTrueFalseButton(true).updateTrueFalseDisplay(mod.runTutorial());
-		runKeyBuilderLabel = new WindowLabel(settings, runKeyBuilderTutorial.endX + 15, runKeyBuilderTutorial.startY + 6, "Enable creation tutorial", 0xb2b2b2);
+		createExample = new WindowButton(settings, sDim.startX + 10, stopMovement.endY + 6, 55, 20).setTrueFalseButton(true).updateTrueFalseDisplay(mod.runTutorial());
+		runKeyBuilderLabel = new WindowLabel(settings, createExample.endX + 15, createExample.startY + 6, "Enable creation tutorial", 0xb2b2b2);
 		
 		stopMovementLabel.enableShadow(true).enableWordWrap(true, 125).setDrawCentered(true);
 		runKeyBuilderLabel.enableShadow(true);
 		
-		IActionObject.setActionReceiver(this, stopMovement, runKeyBuilderTutorial);
+		IActionObject.setActionReceiver(this, stopMovement, createExample);
 		
-		settings.addObject(null, stopMovement, stopMovementLabel, runKeyBuilderTutorial, runKeyBuilderLabel);
+		settings.addObject(null, stopMovement, stopMovementLabel, createExample, runKeyBuilderLabel);
 		
 		keyList = new WindowContainer(this, startX + 2, settings.getDimensions().endY + 1, width - 4, (guiInstance.endY - 2) - (settings.getDimensions().endY + 1));
 		keyList.setTitle("Hotkey Lists");
@@ -98,9 +98,9 @@ public class HotKeySettingsWindow extends WindowParent {
 			stopMovement.updateTrueFalseDisplay(mod.doesCtrlKeyStopMovement());
 			mod.getConfig().saveMainConfig();
 		}
-		if (object == runKeyBuilderTutorial) {
+		if (object == createExample) {
 			mod.setRunTutorial(!mod.runTutorial());
-			runKeyBuilderTutorial.updateTrueFalseDisplay(mod.runTutorial());
+			createExample.updateTrueFalseDisplay(mod.runTutorial());
 			mod.getConfig().saveMainConfig();
 		}
 		if (object == loadKeyList) { reloadKeys(); }

@@ -58,7 +58,6 @@ public class HotKeyCreatorWindow extends WindowParent {
 	KeyComboAction keys;
 	KeyActionType selectedHotKeyType;
 	Class selectedGui;
-	//EScript selectedScript;
 	IDebugCommand selectedDebug;
 	AppType selectedMod;
 	KeyBinding selectedKeyBind;
@@ -85,7 +84,6 @@ public class HotKeyCreatorWindow extends WindowParent {
 	@Override
 	public void initObjects() {
 		defaultHeader(this);
-		//trueFalseList = new EGuiDropDownList(this, wPos - 91, hPos + 37, 17).setFixedWidth(true, 70);
 		
 		keyNameEntry = new WindowTextField(this, startX + 23, startY + 38, width - 48, 13).setTextWhenEmpty("enter a key name");
 		selectType = new WindowButton(this, midX - (width - 66) / 2, startY + 74, width - 66, 17, "Select a type");
@@ -96,21 +94,23 @@ public class HotKeyCreatorWindow extends WindowParent {
 		categoryEntry = new WindowTextField(this, startX + 23, startY + 228, width - 48, 13).setMaxStringLength(20).setTextWhenEmpty("enter a category name");
 		descriptionEntry = new WindowTextField(this, startX + 23, startY + 266, width - 48, 13).setMaxStringLength(200).setTextWhenEmpty("enter a hotkey description");
 		
-		create = new WindowButton(this, startX + 9, endY - 28, 60, 20, key != null ? "Edit" : "Create");
-		setEnabled = new WindowButton(this, midX - 30, endY - 28, 60, 20, key != null ? key.isEnabled() ? "Enabled" : "Disabled" : "Enabled");
-		back = new WindowButton(this, endX - 69, endY - 28, 60, 20, "Back");
+		create = new WindowButton(this, endX - 9 - 70, endY - 28, 70, 20, key != null ? "Edit" : "Create");
+		setEnabled = new WindowButton(this, midX - 35, endY - 28, 70, 20, key != null ? key.isEnabled() ? "Enabled" : "Disabled" : "Enabled");
+		back = new WindowButton(this, startX + 9, endY - 28, 70, 20, "Back");
 		
 		setEnabled.setStringColor(key != null ? key.isEnabled() ? 0x55ff55 : 0xff5555 : 0x55ff55);
 		keysEntry.setTextWhenEmpty("enter keys");
 		
-		//trueFalseList.addListEntry(new DropDownListEntry<Boolean>(Boolean.TRUE.toString(), Boolean.TRUE));
-		//trueFalseList.addListEntry(new DropDownListEntry<Boolean>(Boolean.FALSE.toString(), Boolean.FALSE));
+		create.setStringColor(EColors.aquamarine);
+		back.setStringColor(EColors.yellow);
+		
+		selectType.setStringColor(EColors.seafoam);
 		
 		setEnabled.setVisible(true);
 		
 		//addObject(trueFalseList);
-		addObject(null, keyNameEntry, keysEntry, mainArgEntry, secondaryArgEntry, categoryEntry, descriptionEntry, setEnabled);
-		addObject(null, create, selectType, selectArg1, back);
+		addObject(keyNameEntry, keysEntry, mainArgEntry, secondaryArgEntry, categoryEntry, descriptionEntry, setEnabled);
+		addObject(create, selectType, selectArg1, back);
 		
 		if (key != null) { loadKeyValues(key); }
 		else { updateVisibleObjects(); }
@@ -158,7 +158,6 @@ public class HotKeyCreatorWindow extends WindowParent {
 			case CATEGORY_DEACTIVATOR: firstArgName = "Hotkey category to deactivate:"; firstArgColor = 0xffd800; break;
 			case APP_ACTIVATOR: firstArgName = "App to activate:"; firstArgColor = 0xffd800; break;
 			case APP_DEACTIVATOR: firstArgName = "App to deactivate:"; firstArgColor = 0xffd800; break;
-			//case SCRIPT: firstArgName = "Script:"; secondArgName = "Script Arguments:"; firstArgColor = 0xffd800; secondArgColor = 0xffd800;break;
 			default: break;
 			}
 		}

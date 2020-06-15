@@ -9,11 +9,13 @@ import com.Whodundid.core.util.resourceUtil.EResource;
 import com.Whodundid.core.util.storageUtil.EArrayList;
 import com.Whodundid.core.util.storageUtil.StorageBox;
 import com.Whodundid.hotkeys.control.HotKey;
+import com.Whodundid.hotkeys.control.KeyActionType;
 import com.Whodundid.hotkeys.control.hotKeyTypes.CommandSenderHotKey;
 import com.Whodundid.hotkeys.control.hotKeyUtil.KeyComboAction;
 import com.Whodundid.hotkeys.keySaveLoad.HotKeyBuilder;
 import com.Whodundid.hotkeys.keySaveLoad.KeyLoader;
 import com.Whodundid.hotkeys.keySaveLoad.KeySaver;
+import com.Whodundid.hotkeys.settings.InputDelay;
 import com.Whodundid.hotkeys.util.HKResources;
 import com.Whodundid.hotkeys.window.HotKeyCreatorWindow;
 import com.Whodundid.hotkeys.window.HotKeyMainWindow;
@@ -51,6 +53,7 @@ public final class HotKeyApp extends EMCApp {
 	public static final AppConfigSetting<Boolean> createExampleKey = new AppConfigSetting(Boolean.class, "createExampleKey", "Create Example Hotkey", true);
 	public static final AppConfigSetting<Boolean> exampleKeyCreated = new AppConfigSetting(Boolean.class, "exampleKeyCreated", "Example Hotkey Created", false);
 	public static final AppConfigSetting<Boolean> runCreationTutorial = new AppConfigSetting(Boolean.class, "runCreationTutorial", "Run Hotkey Creation Tutorial", true);
+	public static final InputDelay keyInputDelay = new InputDelay();
 	
 	public static final String MODID = "hotkeys";
 	public static final String VERSION = "2.1";
@@ -61,6 +64,7 @@ public final class HotKeyApp extends EMCApp {
 	protected KeyLoader loader;
 	protected HotKeyBuilder builder;
 	protected String defaultListSort = "enabled";
+	protected long lastCommandKeyTime = 0l;
 	private static HotKeyApp instance;
 	
 	public HotKeyApp() {
@@ -77,7 +81,7 @@ public final class HotKeyApp extends EMCApp {
 		donation = new StorageBox("Consider donating to support EMC development!", "https://www.paypal.me/Whodundid");
 		addDependency(AppType.CORE, "1.0");
 		
-		registerSetting(stopMovement, createExampleKey, exampleKeyCreated, runCreationTutorial);
+		registerSetting(stopMovement, createExampleKey, exampleKeyCreated, keyInputDelay);
 		
 		AppConfigFile config = new AppConfigFile(this, "hotKeySettings", "EMC Hotkey Config") {
 			@Override
@@ -111,6 +115,11 @@ public final class HotKeyApp extends EMCApp {
 	}
 	
 	public static HotKeyApp instance() { return instance; }
+	
+	@Override
+	public void onDevModeDisabled() {
+		keyInputDelay.set(keyInputDelay.get());
+	}
 	
 	private void makeExampleKey() {
 		if (!exampleKeyCreated.get()) {
@@ -242,7 +251,7 @@ public final class HotKeyApp extends EMCApp {
 	
 	@Override
 	public void keyEvent(KeyInputEvent e) {
-		if (isEnabled()) {
+		if (Keyboard.getEventKeyState()) {
 			try {
 				if (Keyboard.isCreated() && Keyboard.getEventKeyState()) {
 					int keyCode = Keyboard.getEventKey();
@@ -288,8 +297,15 @@ public final class HotKeyApp extends EMCApp {
 							HotKey key = registeredHotKeys.get(i);
 							if (key.getKeyCombo() != null) {
 								if (key.getKeyCombo().checkKeys(checkKeys) && key.isEnabled()) {
-									registeredHotKeys.get(i).executeHotKeyAction();
-									//System.out.println(registeredHotKeys.get(i).getKeyDescription());
+									if (key.getHotKeyType() == KeyActionType.COMMANDSENDER || key.getHotKeyType() == KeyActionType.CONDITIONAL_COMMAND_ITEMTEST) {
+										if (System.currentTimeMillis() - lastCommandKeyTime >= keyInputDelay.get()) { //limit inputs
+											lastCommandKeyTime = System.currentTimeMillis();
+											registeredHotKeys.get(i).executeHotKeyAction();
+										}
+									}
+									else {
+										registeredHotKeys.get(i).executeHotKeyAction();
+									}
 								}
 							}
 						}
