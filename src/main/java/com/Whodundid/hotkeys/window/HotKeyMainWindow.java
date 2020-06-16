@@ -41,7 +41,7 @@ public class HotKeyMainWindow extends WindowParent {
 		keyList.setStringColor(EColors.seafoam);
 		settings.setStringColor(EColors.yellow);
 		
-		addObject(null, creator, keyList, keyVisual, settings);
+		addObject(creator, keyList, keyVisual, settings);
 	}
 	
 	@Override

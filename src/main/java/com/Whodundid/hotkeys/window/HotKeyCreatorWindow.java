@@ -329,10 +329,11 @@ public class HotKeyCreatorWindow extends WindowParent {
 				case CATEGORY_ACTIVATOR:
 				case CATEGORY_DEACTIVATOR:
 					if (!categoryEntry.getText().isEmpty() && categoryEntry.getText().equals("enter a category name")) { throw new MissingHotKeyArgumentException("Category name not entered!"); }
+					builder.setBuilderCommand(categoryEntry.getText());
 					break;
 				case APP_ACTIVATOR:
 				case APP_DEACTIVATOR:
-					if (selectedMod == null) { throw new MissingHotKeyArgumentException("SubMod not selected!"); }
+					if (selectedMod == null) { throw new MissingHotKeyArgumentException("App not selected!"); }
 					builder.setBuilderSubMod(selectedMod);
 					break;
 				default: break;
@@ -349,14 +350,22 @@ public class HotKeyCreatorWindow extends WindowParent {
 				}
 				if (builder.buildHotKey(keyNameEntry.getText(), category, description, enabledVal, selectedHotKeyType)) {
 					man.registerHotKey(builder.getBuiltKey());
+					
 					msgBox = new WindowDialogueBox(DialogueBoxTypes.custom) {
-						{ okButton = new WindowButton(this, midX - 25, midY + 10, 50, 20, "Ok"); addObject(null, okButton); }
+						{ okButton = new WindowButton(this, midX - 25, midY + 10, 50, 20, "Ok"); addObject(okButton); }
+						
 						@Override
 						public void actionPerformed(IActionObject object, Object... args) {
 							if (object == okButton) {
-								man.saveHotKeys();
 								close();
 							}
+						}
+						
+						@Override
+						public void close() {
+							super.close();
+							man.saveHotKeys();
+							windowInstance.fileUpAndClose();
 						}
 					};
 					
@@ -372,11 +381,17 @@ public class HotKeyCreatorWindow extends WindowParent {
 					
 					msgBox.setTitleColor(EColors.lgray.intVal);
 					
+					EnhancedMC.reloadAllWindows();
+					
 					EnhancedMC.displayWindow(msgBox, CenterType.screen);
 					getTopParent().setFocusLockObject(msgBox);
 				}
-			} catch (MissingHotKeyArgumentException e) { createErrorDialogue("Creation Error", e.getMessage());
-			} catch (Exception e) { e.printStackTrace(); }
+				else {
+					throw new MissingHotKeyArgumentException("Cannot create hotkey!");
+				}
+			}
+			catch (MissingHotKeyArgumentException e) { createErrorDialogue("Creation Error", e.getMessage()); }
+			catch (Exception e) { e.printStackTrace(); }
 		}
 	}
 	

@@ -24,7 +24,6 @@ public class HotKeyBuilder {
 	int testHeldItemId = -1;
 	IDebugCommand debugCommand;
 	Class gui;
-	//EScript script;
 	String[] scriptArgs;
 	KeyBinding keyBind;
 	boolean val;
@@ -42,7 +41,6 @@ public class HotKeyBuilder {
 	public void setBuilderDebugCommand(IDebugCommand commandIn) { debugCommand = commandIn; }
 	public void setBuilderGuiToBeOpened(Class guiClassIn) { gui = guiClassIn; }
 	public void setBuilderGuiToBeOpened(Class guiClassIn, StorageBox<Class[], Object[]> argsIn) { gui = guiClassIn; additionalGuiArgs = argsIn; }
-	//public void setBuilderScriptToBeRun(EScript scriptIn, String[] scriptArgsIn) { script = scriptIn; scriptArgs = scriptArgsIn; }
 	public void setBuilderKeyBindingIn(KeyBinding keyBindingIn, boolean newVal) { keyBind = keyBindingIn; val = newVal;}
 	public void setBuilderSubMod(AppType modIn) { mod = modIn; }
 	
@@ -52,7 +50,6 @@ public class HotKeyBuilder {
 		testHeldItemId = -1;
 		debugCommand = null;
 		gui = null;
-		//script = null;
 		scriptArgs = null;
 		keyBind = null;
 		val = false;
@@ -74,15 +71,21 @@ public class HotKeyBuilder {
 			case MC_KEYBIND_MODIFIER: createdKey = new KeyBindModifierHotKey(keyName, keys, keyBind, val, keyDescription); break;
 			case APP_ACTIVATOR: createdKey = new ModActivatorHotKey(keyName, keys, mod, keyDescription); break;
 			case APP_DEACTIVATOR: createdKey = new ModDeactivatorHotKey(keyName, keys, mod, keyDescription); break;
-			//case SCRIPT: createdKey = new ScriptHotKey(keyName, keys, script, scriptArgs, keyDescription);break;
+			case CATEGORY_ACTIVATOR: createdKey = new KeyCategoryActivatorHotKey(keyName, keys, command, keyDescription); break;
+			case CATEGORY_DEACTIVATOR: createdKey = new KeyCategoryDeactivatorHotKey(keyName, keys, command, keyDescription); break;
 			default: clearBuilderArgs(); return false;
 			}
 			
 			createdKey.setKeyCategory(categoryIn);
 			clearBuilderArgs();
-		} catch (Exception e) { e.printStackTrace(); return false; }
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
 		return true;
 	}
 	
 	public HotKey getBuiltKey() { return createdKey; }
+	
 }

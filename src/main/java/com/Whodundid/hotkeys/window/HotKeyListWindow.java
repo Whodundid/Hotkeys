@@ -98,12 +98,14 @@ public class HotKeyListWindow extends WindowParent {
 		setEnabled(false, toggleEnabled, edit, delete);
 		
 		valuesList.setBackgroundColor(EColors.pdgray);
+		valuesList.setDrawListObjects(prev != null);
+		
 		edit.setStringColor(EColors.yellow);
 		delete.setStringColor(EColors.lred);
 		
 		buildValuesList();
 		
-		addObject(null, edit, delete, toggleEnabled, keyList, valuesList);
+		addObject(edit, delete, toggleEnabled, keyList, valuesList);
 		
 		buildKeyList(mod.getDefaultListSort());
 	}
@@ -157,7 +159,7 @@ public class HotKeyListWindow extends WindowParent {
 		keyCategory = new WindowLabel(valuesList, categoryLabel.startX + offset, categoryLabel.endY + hgap, "No category", EColors.aquamarine);
 		
 		WindowLabel descLabel = new WindowLabel(valuesList, over, keyCategory.endY + gap, "Description:", EColors.lorange);
-		desc = new WindowLabel(this, descLabel.startX + over, descLabel.endY + hgap, "", EColors.aquamarine).enableWordWrap(true, valuesList.getListDimensions().width);
+		desc = new WindowLabel(this, descLabel.startX + over, descLabel.endY + hgap, "", EColors.aquamarine).enableWordWrap(true, valuesList.getListDimensions().width - 20);
 		
 		valuesList.fitItemsInList(4, 4);
 		int eX = res.getScaledWidth();
@@ -186,8 +188,8 @@ public class HotKeyListWindow extends WindowParent {
 		valuesList.setDrawListObjects(!keyName.isEmpty());
 		
 		if (!valuesList.getDrawListObjects()) {
-			drawStringCS("Select a HotKey from the Registered Hotkeys", valuesList.midX, valuesList.midY - 11, EColors.orange);
-			drawStringCS("list to see its values", valuesList.midX, valuesList.midY, EColors.orange);
+			drawStringCS("Click on a hotkey from the", valuesList.midX, valuesList.midY - 11, EColors.orange);
+			drawStringCS("list to see its values..", valuesList.midX, valuesList.midY, EColors.orange);
 		}
 	}
 	
@@ -325,7 +327,11 @@ public class HotKeyListWindow extends WindowParent {
 				toggleEnabled.setString(keyIn.isEnabled() ? "Enabled" : "Disabled");
 				toggleEnabled.setStringColor(keyIn.isEnabled() ? 0x55ff55 : 0xff5555);
 				
-				valuesList.fitItemsInList(4, 4);
+				//vPos1 = valuesList.getVScrollBar().getScrollPos();
+				//hPos1 = valuesList.getHScrollBar().getScrollPos();
+				valuesList.fitItemsInList(4, 2);
+				//valuesList.getVScrollBar().setScrollBarPos(vPos1);
+				//valuesList.getHScrollBar().setScrollBarPos(hPos1);
 			}
 		}
 		catch (Exception e) { e.printStackTrace(); }

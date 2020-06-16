@@ -7,6 +7,7 @@ import com.Whodundid.core.util.renderUtil.CenterType;
 import com.Whodundid.core.util.renderUtil.EColors;
 import com.Whodundid.core.util.storageUtil.EDimension;
 import com.Whodundid.core.windowLibrary.windowObjects.actionObjects.WindowButton;
+import com.Whodundid.core.windowLibrary.windowObjects.actionObjects.WindowTextField;
 import com.Whodundid.core.windowLibrary.windowObjects.basicObjects.WindowContainer;
 import com.Whodundid.core.windowLibrary.windowObjects.basicObjects.WindowLabel;
 import com.Whodundid.core.windowLibrary.windowObjects.windows.WindowDialogueBox;
@@ -23,6 +24,7 @@ public class HotKeySettingsWindow extends WindowParent {
 	WindowButton stopMovement, createExample;
 	WindowButton loadKeyList, saveKeyList, resetKeyList;
 	WindowLabel stopMovementLabel, runKeyBuilderLabel;
+	WindowTextField commandDelay;
 	WindowDialogueBox msgBox;
 	
 	public HotKeySettingsWindow() {
@@ -49,20 +51,32 @@ public class HotKeySettingsWindow extends WindowParent {
 		settings.setBackgroundColor(EColors.pdgray.intVal);
 		EDimension sDim = settings.getDimensions();
 		
-		stopMovement = new WindowButton(settings, sDim.startX + 10, sDim.startY + 26, 55, 20).setTrueFalseButton(true).updateTrueFalseDisplay(mod.doesCtrlKeyStopMovement());
+		stopMovement = new WindowButton(settings, sDim.startX + 10, sDim.startY + 26, 55, 20, mod.stopMovement);
 		stopMovementLabel = new WindowLabel(settings, stopMovement.endX + (endX - stopMovement.endX) / 2, stopMovement.startY + 4, "Stop movement when Ctrl is pressed", 0xb2b2b2);
 		
-		createExample = new WindowButton(settings, sDim.startX + 10, stopMovement.endY + 6, 55, 20).setTrueFalseButton(true).updateTrueFalseDisplay(mod.runTutorial());
+		createExample = new WindowButton(settings, sDim.startX + 10, stopMovement.endY + 6, 55, 20, mod.createExampleKey);
 		runKeyBuilderLabel = new WindowLabel(settings, createExample.endX + 15, createExample.startY + 6, "Enable creation tutorial", 0xb2b2b2);
+		
+		commandDelay = new WindowTextField(settings, sDim.startX + 11, createExample.endY + 18, 51, 16);
+		WindowLabel commandDelayLabel = new WindowLabel(settings, commandDelay.endX + 12, commandDelay.startY + 4, "CommandSender delay (ms)", EColors.lgray);
 		
 		stopMovementLabel.enableShadow(true).enableWordWrap(true, 125).setDrawCentered(true);
 		runKeyBuilderLabel.enableShadow(true);
 		
-		IActionObject.setActionReceiver(this, stopMovement, createExample);
+		setHoverText("Stops movement when pressing the left Ctrl key.", stopMovement, stopMovementLabel);
+		setHoverText("Creates an example CommandSender hotkey.", createExample, runKeyBuilderLabel);
+		setHoverText("Specifies a minimum delay in the send rate for CommandSender keys.", commandDelay, commandDelayLabel);
 		
-		settings.addObject(null, stopMovement, stopMovementLabel, createExample, runKeyBuilderLabel);
+		commandDelay.setText(mod.keyInputDelay.get().toString());
+		commandDelay.setTextColor(EColors.lgray.intVal);
 		
-		keyList = new WindowContainer(this, startX + 2, settings.getDimensions().endY + 1, width - 4, (guiInstance.endY - 2) - (settings.getDimensions().endY + 1));
+		IActionObject.setActionReceiver(this, stopMovement, createExample, commandDelay);
+		
+		settings.addObject(stopMovement, stopMovementLabel, createExample, commandDelay, commandDelayLabel, runKeyBuilderLabel);
+		
+		//key lists
+		
+		keyList = new WindowContainer(this, startX + 2, settings.getDimensions().endY + 1, width - 4, (windowInstance.endY - 2) - (settings.getDimensions().endY + 1));
 		keyList.setTitle("Hotkey Lists");
 		keyList.setTitleColor(EColors.orange.intVal);
 		keyList.setTitleBackgroundColor(0xff191919);
@@ -77,35 +91,47 @@ public class HotKeySettingsWindow extends WindowParent {
 		loadKeyList.setStringColor(EColors.yellow);
 		saveKeyList.setStringColor(EColors.yellow);
 		resetKeyList.setStringColor(EColors.lred);
+		//resetKeyList.getDisplayLabel().enableShadow(false);
 		
 		IActionObject.setActionReceiver(this, loadKeyList, saveKeyList, resetKeyList);
 		
-		keyList.addObject(null, loadKeyList, saveKeyList, resetKeyList);
+		keyList.addObject(loadKeyList, saveKeyList, resetKeyList);
 		
-		addObject(null, settings, keyList);
+		addObject(settings, keyList);
 	}
 	
 	@Override
 	public void drawObject(int mXIn, int mYIn) {
 		drawDefaultBackground();
 		super.drawObject(mXIn, mYIn);
+		
+		drawRect(settings.startX, createExample.endY + 8, settings.endX, createExample.endY + 9, EColors.black);
 	}
 	
 	@Override
 	public void actionPerformed(IActionObject object, Object... args) {
-		if (object == stopMovement) {
-			mod.setStopMovementOnPress(!mod.doesCtrlKeyStopMovement());
-			stopMovement.updateTrueFalseDisplay(mod.doesCtrlKeyStopMovement());
-			mod.getConfig().saveMainConfig();
-		}
+		if (object == stopMovement) { stopMovement.toggleTrueFalse(mod.stopMovement, mod, true); }
 		if (object == createExample) {
 			mod.setRunTutorial(!mod.runTutorial());
-			createExample.updateTrueFalseDisplay(mod.runTutorial());
-			mod.getConfig().saveMainConfig();
+			createExample.toggleTrueFalse(mod.createExampleKey, mod, true);
 		}
+		
 		if (object == loadKeyList) { reloadKeys(); }
 		if (object == saveKeyList) { saveKeys(); }
 		if (object == resetKeyList) { resetKeys(); }
+		
+		if (object == commandDelay) {
+			try {
+				long val = Long.parseLong(commandDelay.getText());
+				mod.keyInputDelay.set(val);
+				commandDelay.setText(mod.keyInputDelay.get().toString());
+			}
+			catch (Exception e) {
+				commandDelay.setText(mod.keyInputDelay.get().toString());
+			}
+			
+			windowInstance.requestFocus();
+		}
 	}
 	
 	public void reloadKeys() {
@@ -145,7 +171,7 @@ public class HotKeySettingsWindow extends WindowParent {
 		msgBox.setTitle("HotKey Reset");
 		msgBox.setTitleColor(EColors.lgray.intVal);
 		msgBox.setMessage("Are you sure you want to reset hotkeys? This will delete all user made hotkeys and clear the user key file! CANNOT BE UNDONE!").setMessageColor(0xff5555);
-		guiInstance.addObject(msgBox);
+		EnhancedMC.displayWindow(msgBox);
 	}
 	
 }

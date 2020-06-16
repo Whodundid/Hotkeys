@@ -5,6 +5,7 @@ import com.Whodundid.core.app.AppType;
 import com.Whodundid.core.app.EMCApp;
 import com.Whodundid.core.app.config.AppConfigFile;
 import com.Whodundid.core.app.config.AppConfigSetting;
+import com.Whodundid.core.terminal.window.ETerminal;
 import com.Whodundid.core.util.resourceUtil.EResource;
 import com.Whodundid.core.util.storageUtil.EArrayList;
 import com.Whodundid.core.util.storageUtil.StorageBox;
@@ -16,6 +17,7 @@ import com.Whodundid.hotkeys.keySaveLoad.HotKeyBuilder;
 import com.Whodundid.hotkeys.keySaveLoad.KeyLoader;
 import com.Whodundid.hotkeys.keySaveLoad.KeySaver;
 import com.Whodundid.hotkeys.settings.InputDelay;
+import com.Whodundid.hotkeys.terminal.CreateExampleKey;
 import com.Whodundid.hotkeys.util.HKResources;
 import com.Whodundid.hotkeys.window.HotKeyCreatorWindow;
 import com.Whodundid.hotkeys.window.HotKeyMainWindow;
@@ -75,7 +77,7 @@ public final class HotKeyApp extends EMCApp {
 	@Override
 	public void build() {
 		version = VERSION;
-		versionDate = "June 11, 2020";
+		versionDate = "June 14, 2020";
 		author = "Whodundid";
 		artist = "Mr.JamminOtter";
 		donation = new StorageBox("Consider donating to support EMC development!", "https://www.paypal.me/Whodundid");
@@ -121,17 +123,22 @@ public final class HotKeyApp extends EMCApp {
 		keyInputDelay.set(keyInputDelay.get());
 	}
 	
-	private void makeExampleKey() {
-		if (!exampleKeyCreated.get()) {
-			registerHotKey(new CommandSenderHotKey("Example Hotkey", new KeyComboAction(Keyboard.KEY_H), "/help") {
-				{
-					setKeyDescription("This is an example of a CommandSender Hotkey. When pressed it send the command '/help'.");
-					setKeyCategory("Example");
-				}
-			});
-			exampleKeyCreated.set(true);
-			getConfig().saveMainConfig();
+	@Override
+	public void terminalRegisterCommandEvent(ETerminal termIn, boolean runVisually) {
+		if (!isIncompatible()) {
+			EnhancedMC.getTerminalHandler().registerCommand(new CreateExampleKey(), termIn, runVisually);
 		}
+	}
+	
+	public void createExampleKey() {
+		registerHotKey(new CommandSenderHotKey("Example Hotkey", new KeyComboAction(Keyboard.KEY_H), "/help") {
+			{
+				setKeyDescription("This is an example of a CommandSender Hotkey. When pressed it send the command '/help'.");
+				setKeyCategory("Example");
+			}
+		});
+		exampleKeyCreated.set(true);
+		getConfig().saveMainConfig();
 	}
 	
 	public boolean registerHotKey(HotKey keyIn) {
@@ -235,7 +242,7 @@ public final class HotKeyApp extends EMCApp {
 		registeredHotKeys.clear();
 		for (HotKey k : appHotKeys) { registerHotKey(k); }
 		loader.loadKeysFromFile();
-		if (createExampleKey.get()) { makeExampleKey(); }
+		if (createExampleKey.get() && !exampleKeyCreated.get()) { createExampleKey(); }
 		for (HotKey k : loader.getLoadedKeys()) { registerHotKey(k); }
 		saver.saveKeysToFile();
 		EnhancedMC.reloadAllWindows();
@@ -245,7 +252,7 @@ public final class HotKeyApp extends EMCApp {
 		registeredHotKeys.clear();
 		saver.saveKeysToFile();
 		for (HotKey k : appHotKeys) { registerHotKey(k); }
-		if (createExampleKey.get()) { makeExampleKey(); }
+		if (createExampleKey.get() && !exampleKeyCreated.get()) { createExampleKey(); }
 		EnhancedMC.reloadAllWindows();
 	}
 	
